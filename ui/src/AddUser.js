@@ -1,0 +1,38 @@
+import React,{useState} from "react";
+import axios from "axios";
+
+export default ()=>{
+    const UID="100"
+   const [FName,updateFname]= useState("")
+   const [RollNo,updateRollNo]= useState("")
+   const [Contact,updateContact]= useState("")
+   const handleMySubmit= async(e) =>{
+       if (FName!=""&&RollNo!=""&&Contact!=""){
+
+       
+       e.preventDefault();
+       await axios.post(`http://localhost:4002/api/v1/blog/adduser`,{UID,FName,RollNo,Contact}).catch(e=>console.log(e.message))
+       updateFname('')
+       updateContact('')
+       updateRollNo('')}
+       else{
+           alert("Incomplete Inputs")
+       }
+   }
+
+   return(
+        <form onSubmit={handleMySubmit}>
+            <div>
+        <label className="form-group">Roll Number</label>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="text" value={RollNo} onChange={(e)=>updateRollNo(e.target.value)} className="form-control"/><br /><br />
+        <label className="form-group">Full Name</label>&nbsp;&nbsp;&nbsp;&nbsp; 
+        <input type="text" value={FName} onChange={(e)=>updateFname(e.target.value)} className="form-control"/><br /><br />
+        <label className="form-group">Mobile</label>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="text" value={Contact} onChange={(e)=>updateContact(e.target.value)} className="form-control"/><br /><br />
+        </div> RollNo:&nbsp;&nbsp;&nbsp;&nbsp;{RollNo}<br/><br/>Fullname:&nbsp;&nbsp;&nbsp;&nbsp;{FName}<br/><br/>Mobile:&nbsp;&nbsp;&nbsp;&nbsp;{Contact}<br/><br/>
+            
+            <button className="btn btn-primary">Add User</button>
+           
+        </form>
+    )
+}
