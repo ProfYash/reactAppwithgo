@@ -1,5 +1,8 @@
 import ReactDOM from 'react-dom'
 import React from 'react'
 import App from './App'
-
-ReactDOM.render(<App></App>,document.getElementById('root'))
+import {BrowserRouter} from 'react-router-dom'
+import { CookiesProvider  } from 'react-cookie'
+ReactDOM.render(<BrowserRouter><CookiesProvider> 
+<App /></CookiesProvider> 
+</BrowserRouter>,document.getElementById('root'))
