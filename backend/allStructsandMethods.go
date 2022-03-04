@@ -1,11 +1,9 @@
 package main
 
 import (
-	//structure "backend/structs"
-
-	"net/http"
-
 	"fmt"
+	"net/http"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 	"gorm.io/driver/sqlite"
@@ -111,4 +109,49 @@ func isValidCoockie(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
+}
+func refreshToken(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("token")
+	if err != nil {
+		if err == http.ErrNoCookie {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	tokenStr := cookie.Value
+	claims := &Claims{}
+	tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
+		return jwtKey, nil
+	})
+	if err != nil {
+		if err == jwt.ErrSignatureInvalid {
+			w.WriteHeader(http.StatusUnauthorized)
+			return
+		}
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if !tkn.Valid {
+		w.WriteHeader(http.StatusUnauthorized)
+		return
+	}
+	if time.Unix(claims.ExpiresAt, 0).Sub(time.Now()) > 30*time.Second {
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	expirationTime := time.Now().Add(time.Minute * 30)
+	claims.ExpiresAt = expirationTime.Unix()
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(jwtKey)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	http.SetCookie(w, &http.Cookie{
+		Name:    "tokenRefreshed",
+		Value:   tokenString,
+		Expires: expirationTime,
+	})
 }
