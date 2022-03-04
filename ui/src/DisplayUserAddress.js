@@ -1,11 +1,11 @@
 import React,{useState,useEffect} from "react";
 import axios from "axios";
 import {useParams} from "react-router-dom"
-export default () => {
+export default ({roll}) => {
 const [loginStatus,updateloginStatus]=useState('')
     const [address,updateaddress] = useState({})
-    let RollNo=useParams().roll // creating a hook for updates
-console.log(useParams().roll)
+    let RollNo=roll 
+console.log(RollNo)
    
 const loadusers = async (e)=>{
     
@@ -31,7 +31,7 @@ useEffect(() => {
 //creating dynmic number of cards
 const cardofuser = Object.values(address).map(a=>{
     return (
-        <div className="card" style={{ width:"30%", marginBottom:"20px"}}>
+        <div className="card" style={{ width:"50%", marginBottom:"50px"}}>
 
 <div className="card-body" key={a.addid}>
 {/* ID:&nbsp;&nbsp;&nbsp;{u.UID}<br /><br /> */}
@@ -50,8 +50,7 @@ const cardofuser = Object.values(address).map(a=>{
     return(
         // <div><h1>Display</h1></div> //do this initially
          <div className="d-flex felx-row flex-wrap justify-content-between">
-             
-     <h1>{loginStatus}</h1><br />
+
      {cardofuser}
          </div> 
          )

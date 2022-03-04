@@ -1,7 +1,13 @@
 import React,{useState,useEffect} from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import DisplayUserAddress from './DisplayUserAddress'
+import AddAddress from "./AddAddress";
+
 export default () => {
-const [loginStatus,updateloginStatus]=useState('')
+    let navigate = useNavigate();
+    
+    const [loginStatus,updateloginStatus]=useState('')
     const [users,updateusers] = useState({}) // creating a hook for updates
 const loadusers = async ()=>{
    const resp = await axios.get("http://localhost:4002/api/v1/blog/getUser").catch(e=>{
@@ -20,26 +26,31 @@ if( resp!=null){
 }
 useEffect(() => {
     loadusers();
-},[])//useeffect for call method at time of load and only once
+},[])
 
-//creating dynmic number of cards
+
 const cardofuser = Object.values(users).map(u=>{
     return (
         <div className="card" style={{ width:"30%", marginBottom:"20px"}}>
 
-<div className="card-body" key={u.UID}>
-{/* ID:&nbsp;&nbsp;&nbsp;{u.UID}<br /><br /> */}
-    Name:&nbsp;&nbsp;&nbsp;{u.FName}<br /><br />
-    Roll:&nbsp;&nbsp;&nbsp;{u.RollNo}<br /><br />
-    Mobile:&nbsp;&nbsp;&nbsp;{u.Contact}<br /><br />
-{/* hello world */}
-</div>
+            <div className="card-body" key={u.UID}>
+                Name:&nbsp;&nbsp;&nbsp;{u.FName}<br /><br />
+                Roll:&nbsp;&nbsp;&nbsp;{u.RollNo}<br /><br />
+                Mobile:&nbsp;&nbsp;&nbsp;{u.Contact}<br /><br />
+            </div>
+            <div className="card-body" key={u.UID}>
+               <DisplayUserAddress roll={u.RollNo} />
+            </div>
+            <div className="card-body" key={u.UID}>   
+            {/* <AddAddress r={u.RollNo}/> */}
+                <button className="btn btn-primary" onClick={()=>navigate(`/AddAddress/${u.RollNo}`)}>Add Address</button>
+            </div>
         </div>
     )
 })
-// if (users!={}){
+
     return(
-        // <div><h1>Display</h1></div> //do this initially
+       
          <div className="d-flex felx-row flex-wrap justify-content-between">
      <h1>{loginStatus}</h1><br />
      {cardofuser}

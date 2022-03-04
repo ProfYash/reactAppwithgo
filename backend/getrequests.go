@@ -44,12 +44,12 @@ func homePage(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Hello, %s", claims.Username)
 }
 func getUser(w http.ResponseWriter, r *http.Request) {
-	refreshToken(w, r)
+
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-
+	//refreshToken(w, r)
 	fmt.Println("Inside getUser")
 	if isValidCoockie(w, r) {
 		db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
@@ -70,7 +70,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 }
 func getUsersAddress(w http.ResponseWriter, r *http.Request) {
-	refreshToken(w, r)
+	//refreshToken(w, r)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")

@@ -13,7 +13,7 @@ function App(){
             <Route exact path="/home" component={Home} element={<Home />} />
             <Route exact path="/" component={Login} element={<Login />} />
             <Route exact path="/AllUsers" component={DisplayUser} element={<DisplayUser />} />
-            <Route exact path="/AddAddress" component={AddAddress} element={<AddAddress />} />
+            <Route exact path="/AddAddress/:roll" component={AddAddress} element={<AddAddress />} />
             <Route exact path="/DisplayAddress/:roll" component={DisplayUserAddress} element={<DisplayUserAddress />} />
             <Route path="*" element={<Login />} />
             </Routes>

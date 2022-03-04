@@ -1,5 +1,6 @@
 import React,{useState} from "react";
 import axios from "axios";
+import {useParams} from "react-router-dom"
 
 export default()=> {
 const UID="100"
@@ -8,7 +9,9 @@ const [addressname,updateaddressname]=useState('')
 const [firstlineadd,updatefirstline]=useState('')
 const [city,updatecity]=useState('')
 const [pincode,updatepincode]=useState('')
-const [RollNo,updateRollNo]= useState('')
+//const [RollNo,updateRollNo]= useState('')
+let RollNo=useParams().roll
+
 const handleMyAddress=async(e)=>{
     if (firstlineadd!=""&&RollNo!=""&&city!=""&&pincode!=""){
 
@@ -17,7 +20,7 @@ const handleMyAddress=async(e)=>{
         await axios.post(`http://localhost:4002/api/v1/blog/addaddress/${RollNo}`,{addid,UID,addressname,firstlineadd,city,pincode}).catch(e=>console.log(e.message))
         updatecity('')
         updatepincode('')
-        updateRollNo('')
+        
         updatefirstline('')
     }
         else{
@@ -29,8 +32,8 @@ const handleMyAddress=async(e)=>{
     return(
         <form onSubmit={handleMyAddress}>
             <div>
-        <label className="form-group">Roll Number</label>&nbsp;&nbsp;&nbsp;&nbsp;
-        <input type="text" value={RollNo} onChange={(e)=>updateRollNo(e.target.value)} className="form-control"/><br /><br />
+        {/* <label className="form-group">Roll Number</label>&nbsp;&nbsp;&nbsp;&nbsp;
+        <input type="text" value={RollNo} onChange={(e)=>updateRollNo(e.target.value)} className="form-control"/><br /><br /> */}
         <label className="form-group">AddressName:</label>&nbsp;&nbsp;&nbsp;&nbsp; 
         <input type="text" value={addressname} onChange={(e)=>updateaddressname(e.target.value)} className="form-control"/><br /><br />
         <label className="form-group">Address Line 1:</label>&nbsp;&nbsp;&nbsp;&nbsp; 
@@ -39,9 +42,10 @@ const handleMyAddress=async(e)=>{
         <input type="text" value={city} onChange={(e)=>updatecity(e.target.value)} className="form-control"/><br /><br />
         <label className="form-group">Pincode:</label>&nbsp;&nbsp;&nbsp;&nbsp;
         <input type="text" value={pincode} onChange={(e)=>updatepincode(e.target.value)} className="form-control"/><br /><br />
-        </div> RollNo:&nbsp;&nbsp;&nbsp;&nbsp;{RollNo}
+        </div>
+         {/* RollNo:&nbsp;&nbsp;&nbsp;&nbsp;{RollNo} */}
             
-            <button className="btn btn-primary">Add User</button>
+            <button className="btn btn-primary">Add Address</button>
            
         </form>
     )
