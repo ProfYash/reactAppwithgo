@@ -1,6 +1,7 @@
 package main
 
 import (
+	//structure "backend/structs"
 	"encoding/json"
 	"fmt"
 	"log"
@@ -15,46 +16,6 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 )
-
-var jwtKey = []byte("secretkey")
-var adminUsers = map[string]string{
-	"user1": "pass1",
-	"user2": "pass2",
-	"user3": "pass3",
-}
-
-type adminModel struct {
-	gorm.Model
-	Username string
-	Password string
-}
-type Credentials struct {
-	Username string `json:"username"`
-	Password string `json:"password"`
-}
-type Claims struct {
-	Username string
-	jwt.StandardClaims
-}
-type User struct {
-	gorm.Model
-	UID     string `json:"UID"`
-	FName   string `json:"FName"`
-	RollNo  string `json:"RollNo"`
-	Contact string `json:"Contact"`
-}
-type Address struct {
-	AddID            string `json:"addid"`
-	UID              string `json:"UID"`
-	AddressName      string `json:"addressname"`
-	FirstLineAddress string `json:"firstlineadd"`
-	City             string `json:"city"`
-	Pincode          string `json:"pincode"`
-	gorm.Model
-}
-
-var user []User
-var flagfordelete int
 
 func main() {
 	flagfordelete = 0
@@ -240,7 +201,7 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 		genrateUID := uuid.New()
 		newUser.UID = genrateUID.String()
 		//user = append(user, newUser)
-		db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
 		if err != nil {
 			panic("failed to connect database")
 		}
@@ -264,7 +225,7 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Inside getUser")
 	if isValidCoockie(w, r) {
-		db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
 		if err != nil {
 			panic("failed to connect database")
 		}
@@ -288,7 +249,7 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	fmt.Println("Inside DeleteUSer")
 	if isValidCoockie(w, r) {
-		db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
 		if err != nil {
 			panic("failed to connect database")
 		}
@@ -319,28 +280,14 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func _deleteUserAtUid(RollNo string) {
-	for index, u := range user {
-		if u.RollNo == RollNo {
-			user = append(user[:index], user[index+1:]...)
-			flagfordelete = 1
-			break
-		}
-	}
-	if flagfordelete == 1 {
-		flagfordelete = 0
-	} else {
-		fmt.Println("Invalid Roll No")
-		flagfordelete = 2
-	}
-}
+
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	fmt.Println("Inside UpdateUser")
-	db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
@@ -370,49 +317,7 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 }
-func getByRoll(RollNo string) bool {
-	db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	var usersForDisplay []User
-	db.Find(usersForDisplay)
-	for _, u := range usersForDisplay {
-		if RollNo == u.RollNo {
-			return true
-		}
-	}
-	return false
-}
-func isValidCoockie(w http.ResponseWriter, r *http.Request) bool {
-	cookie, err := r.Cookie("token")
-	if err != nil {
-		if err == http.ErrNoCookie {
-			w.WriteHeader(http.StatusUnauthorized)
-			return false
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		return false
-	}
-	tokenStr := cookie.Value
-	claims := &Claims{}
-	tkn, err := jwt.ParseWithClaims(tokenStr, claims, func(t *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
-	})
-	if err != nil {
-		if err == jwt.ErrSignatureInvalid {
-			w.WriteHeader(http.StatusUnauthorized)
-			return false
-		}
-		w.WriteHeader(http.StatusBadRequest)
-		return false
-	}
-	if !tkn.Valid {
-		w.WriteHeader(http.StatusUnauthorized)
-		return false
-	}
-	return true
-}
+
 func addAddress(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
@@ -424,18 +329,12 @@ func addAddress(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic("failed to connect address database")
 		}
-		dbaddress.AutoMigrate(&Address{})
-		dbuser, err1 := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
-		if err1 != nil {
-			panic("failed to connect users database")
-		}
-		dbaddress.AutoMigrate(&Address{})
 		var allusers []User
 		var address Address
 		_ = json.NewDecoder(r.Body).Decode(&address)
 		params := mux.Vars(r)
 		fmt.Println(params)
-		dbuser.Find(&allusers)
+		dbaddress.Find(&allusers)
 		var uidofuser = ""
 		for _, u := range allusers {
 			if u.RollNo == params[("RollNo")] {
@@ -473,14 +372,10 @@ func getUsersAddress(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic("failed to connect address database")
 		}
-		dbusers, err1 := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
-		if err1 != nil {
-			panic("failed to connect address database")
-		}
 		var allusers []User
 		var addressfordisplay []Address
 		var userid = ""
-		dbusers.Find(&allusers)
+		dbaddress.Find(&allusers)
 		params := mux.Vars(r)
 		fmt.Println("this is roll", params)
 		for _, u := range allusers {
@@ -511,16 +406,12 @@ func deleteAddress(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			panic("failed to connect address database")
 		}
-		dbuser, err1 := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
-		if err1 != nil {
-			panic("failed to connect address database")
-		}
 		var allusers []User
 		var addressfordisplay []Address
 		var addresstodelete []Address
 		var userid = ""
 
-		dbuser.Find(&allusers)
+		dbaddress.Find(&allusers)
 
 		params := mux.Vars(r)
 		fmt.Println(params[("RollNo")])
