@@ -43,6 +43,15 @@ type User struct {
 	RollNo  string `json:"RollNo"`
 	Contact string `json:"Contact"`
 }
+type Address struct {
+	AddID            string `json:"addid"`
+	UID              string `json:"UID"`
+	AddressName      string `json:"addressname"`
+	FirstLineAddress string `json:"firstlineadd"`
+	City             string `json:"city"`
+	Pincode          string `json:"pincode"`
+	gorm.Model
+}
 
 var user []User
 var flagfordelete int
@@ -103,6 +112,9 @@ func handleRequests() {
 	router.HandleFunc("/api/v1/blog/adduser", addUser).Methods("POST")
 	router.HandleFunc("/api/v1/blog/deleteuser/{RollNo}", deleteUser).Methods("DELETE")
 	router.HandleFunc("/api/v1/blog/UpdateUser/{RollNo}", UpdateUser).Methods("PUT")
+	router.HandleFunc("/api/v1/blog/addaddress/{RollNo}", addAddress).Methods("POST")
+	router.HandleFunc("/api/v1/blog/addaddress/{RollNo}", getUsersAddress).Methods("GET")
+	router.HandleFunc("/api/v1/blog/deleteaddress/{RollNo}/{AddName}", deleteAddress).Methods("DELETE")
 	log.Fatal(http.ListenAndServe(":4002", handlers.CORS(originsOk, headersOk, methodsOk)(router)))
 }
 func loginPage(w http.ResponseWriter, r *http.Request) {
@@ -400,4 +412,146 @@ func isValidCoockie(w http.ResponseWriter, r *http.Request) bool {
 		return false
 	}
 	return true
+}
+func addAddress(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	fmt.Println("Inside addAddress")
+	if isValidCoockie(w, r) {
+		dbaddress, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
+		if err != nil {
+			panic("failed to connect address database")
+		}
+		dbaddress.AutoMigrate(&Address{})
+		dbuser, err1 := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		if err1 != nil {
+			panic("failed to connect users database")
+		}
+		dbaddress.AutoMigrate(&Address{})
+		var allusers []User
+		var address Address
+		_ = json.NewDecoder(r.Body).Decode(&address)
+		params := mux.Vars(r)
+		fmt.Println(params)
+		dbuser.Find(&allusers)
+		var uidofuser = ""
+		for _, u := range allusers {
+			if u.RollNo == params[("RollNo")] {
+				uidofuser = u.UID
+				break
+			}
+		}
+		fmt.Println("Found UID")
+		if uidofuser != "" {
+			address.UID = uidofuser
+			genrateUID := uuid.New()
+			address.AddID = genrateUID.String()
+			fmt.Println("Address Created")
+			dbaddress.Create(&address)
+			fmt.Println("Address Inserted")
+			w.WriteHeader(200)
+		} else {
+			w.WriteHeader(http.StatusNotFound)
+		}
+
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "Unauthorized")
+	}
+
+}
+func getUsersAddress(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	fmt.Println("Inside getUsersAddress")
+	if isValidCoockie(w, r) {
+		dbaddress, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
+		if err != nil {
+			panic("failed to connect address database")
+		}
+		dbusers, err1 := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		if err1 != nil {
+			panic("failed to connect address database")
+		}
+		var allusers []User
+		var addressfordisplay []Address
+		var userid = ""
+		dbusers.Find(&allusers)
+		params := mux.Vars(r)
+		fmt.Println("this is roll", params)
+		for _, u := range allusers {
+			if u.RollNo == params[("RollNo")] {
+				userid = u.UID
+				break
+			}
+		}
+		if userid != "" {
+			dbaddress.Where("uid = ?", userid).Find(&addressfordisplay)
+			json.NewEncoder(w).Encode(addressfordisplay)
+			w.WriteHeader(200)
+		}
+
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "Unauthorized")
+	}
+}
+func deleteAddress(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.Header().Set("Access-Control-Allow-Origin", "*")
+	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
+	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+	fmt.Println("Inside getUsersAddress")
+	if isValidCoockie(w, r) {
+		dbaddress, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
+		if err != nil {
+			panic("failed to connect address database")
+		}
+		dbuser, err1 := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		if err1 != nil {
+			panic("failed to connect address database")
+		}
+		var allusers []User
+		var addressfordisplay []Address
+		var addresstodelete []Address
+		var userid = ""
+
+		dbuser.Find(&allusers)
+
+		params := mux.Vars(r)
+		fmt.Println(params[("RollNo")])
+		fmt.Println(params[("AddName")])
+		for _, u := range allusers {
+
+			if u.RollNo == params[("RollNo")] {
+				userid = u.UID
+				break
+			}
+		}
+		fmt.Println(userid)
+		if userid != "" {
+			dbaddress.Where("uid = ?", userid).Find(&addressfordisplay)
+			// dbaddress.Find(&usersaddress)
+			for _, a := range addressfordisplay {
+
+				if a.AddressName == params[("AddName")] {
+					fmt.Println(a.AddressName)
+					addresstodelete = append(addresstodelete, a)
+
+				}
+
+			}
+
+			dbaddress.Delete(&addresstodelete)
+			w.WriteHeader(200)
+		}
+
+	} else {
+		w.WriteHeader(http.StatusUnauthorized)
+		fmt.Fprintf(w, "Unauthorized")
+	}
 }

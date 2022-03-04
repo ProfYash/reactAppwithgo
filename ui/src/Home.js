@@ -1,19 +1,28 @@
-import React,{useEffect} from 'react'
+import React,{useEffect,useState} from 'react'
 import AddUser from './AddUser'
 import DeleteUser from './DeleteUser'
 import DisplayUser from './DisplayUser'
 import UpdateUser from './UpdateUser'
 import Cookies from 'universal-cookie';
 import { useNavigate } from "react-router-dom";
+import DeleteUserAdd from './DeleteUserAdd'
 
 export default ()=>{
    const cook=new Cookies()
     let cookie=cook.get('token')
     let navigate = useNavigate();
     let path='/AllUsers'
+    const [RollNo,updateRollNo]= useState("")
     function goTODisplayUser(){
         navigate(path);
     }
+    function goTOAddAddress(){
+        navigate('/AddAddress')
+    }
+    function goTODisplayUserAddress(){
+        navigate(`/DisplayAddress/${RollNo}`)
+    }
+
     console.log(cookie)
     // return (xml/hml);
     // useEffect(() => {
@@ -63,7 +72,36 @@ if (cookie==null){
                         </div>
                     </div>
                 </div>
+                <div class="col-sm">
+                    <div className="card">
+                        <div className="card-body">     
+                            <h2>Add Address</h2>
+                            <button className="btn btn-primary" onClick={goTOAddAddress}>Click Here</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-sm">
+                    <div className="card">
+                        <div className="card-body">     
+                            <h2>Display Address</h2>
+                            <label className="form-group">Roll Number</label>&nbsp;&nbsp;&nbsp;&nbsp;
+                            <input type="text" value={RollNo} onChange={(e)=>updateRollNo(e.target.value)} className="form-control"/><br /><br />
+                            <button className="btn btn-primary" onClick={goTODisplayUserAddress}>Click Here</button>
+                        </div>
+                    </div>
+                </div>
             </div>
+            <div class="row"> 
+                <div class="col-sm">
+                    <div className="card">
+                        <div className="card-body">
+                        <h2>Delete User Address from here</h2>
+                        <DeleteUserAdd />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </div>
      )
  }
