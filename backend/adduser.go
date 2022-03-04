@@ -37,6 +37,7 @@ type Claims struct {
 	jwt.StandardClaims
 }
 type User struct {
+	gorm.Model
 	UID     string `json:"UID"`
 	FName   string `json:"FName"`
 	RollNo  string `json:"RollNo"`
@@ -48,20 +49,20 @@ var flagfordelete int
 
 func main() {
 	flagfordelete = 0
-	genrateUID := uuid.New()
+	//genrateUID := uuid.New()
 
-	user = append(user, User{
-		UID:     genrateUID.String(),
-		FName:   "cheese",
-		RollNo:  "54",
-		Contact: "989898998",
-	})
-	user = append(user, User{
-		UID:     genrateUID.String(),
-		FName:   "yashshah",
-		RollNo:  "55",
-		Contact: "12348",
-	})
+	// user = append(user, User{
+	// 	UID:     genrateUID.String(),
+	// 	FName:   "cheese",
+	// 	RollNo:  "54",
+	// 	Contact: "989898998",
+	// })
+	// user = append(user, User{
+	// 	UID:     genrateUID.String(),
+	// 	FName:   "yashshah",
+	// 	RollNo:  "55",
+	// 	Contact: "12348",
+	// })
 	db, err := gorm.Open(sqlite.Open("admins.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
@@ -226,10 +227,16 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 		_ = json.NewDecoder(r.Body).Decode(&newUser)
 		genrateUID := uuid.New()
 		newUser.UID = genrateUID.String()
-		user = append(user, newUser)
+		//user = append(user, newUser)
+		db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		if err != nil {
+			panic("failed to connect database")
+		}
+		db.AutoMigrate(&User{})
+		db.Create(&newUser)
 
 		fmt.Println(newUser)
-		json.NewEncoder(w).Encode(user)
+		json.NewEncoder(w).Encode(newUser)
 		w.WriteHeader(200)
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -245,7 +252,16 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println("Inside getUser")
 	if isValidCoockie(w, r) {
-		json.NewEncoder(w).Encode(user)
+		db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		if err != nil {
+			panic("failed to connect database")
+		}
+		var usersForDisplay []User
+		db.Find(&usersForDisplay)
+		json.NewEncoder(w).Encode(usersForDisplay)
+		for i, _ := range usersForDisplay {
+			usersForDisplay[i] = User{}
+		}
 		w.WriteHeader(200)
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -260,14 +276,30 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	fmt.Println("Inside DeleteUSer")
 	if isValidCoockie(w, r) {
+		db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+		if err != nil {
+			panic("failed to connect database")
+		}
+		var usersForDisplay []User
 		params := mux.Vars(r)
 		fmt.Println(params)
-		if getByRoll(params[("RollNo")]) {
-			_deleteUserAtUid(params[("RollNo")])
-			json.NewEncoder(w).Encode(user)
-		} else {
-			w.WriteHeader(http.StatusNotFound)
+		//if getByRoll(params[("RollNo")]) {
+		rollToDelete := params[("RollNo")]
+		fmt.Println(rollToDelete)
+		db.Find(&usersForDisplay)
+		for _, u := range usersForDisplay {
+			fmt.Println(u.RollNo)
 		}
+		db.Where("roll_no = ?", rollToDelete).Delete(&usersForDisplay)
+		for index, _ := range usersForDisplay {
+			usersForDisplay[index] = User{}
+		}
+		db.Find(&usersForDisplay)
+		// _deleteUserAtUid(params[("RollNo")])
+		// json.NewEncoder(w).Encode(user)
+		//} else {
+		//w.WriteHeader(http.StatusNotFound)
+		//}
 		w.WriteHeader(200)
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -296,22 +328,29 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	fmt.Println("Inside UpdateUser")
+	db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	var usersForDisplay []User
+
 	if isValidCoockie(w, r) {
 		var newUser User
 		_ = json.NewDecoder(r.Body).Decode(&newUser)
 		params := mux.Vars(r)
 		fmt.Println(params)
-		_deleteUserAtUid(params[("RollNo")])
-		if flagfordelete == 0 {
-			genrateUID := uuid.New()
-			newUser.UID = genrateUID.String()
-			user = append(user, newUser)
-		} else if flagfordelete == 2 {
-			flagfordelete = 0
-			w.WriteHeader(http.StatusNotFound)
-		}
+		db.Model(&usersForDisplay).Where("roll_no = ?", params[("RollNo")]).Updates(newUser)
+		// _deleteUserAtUid(params[("RollNo")])
+		// if flagfordelete == 0 {
+		// 	genrateUID := uuid.New()
+		// 	newUser.UID = genrateUID.String()
+		// 	user = append(user, newUser)
+		// } else if flagfordelete == 2 {
+		// 	flagfordelete = 0
+		// 	w.WriteHeader(http.StatusNotFound)
+		// }
 
-		json.NewEncoder(w).Encode(user)
+		json.NewEncoder(w).Encode(newUser)
 		w.WriteHeader(200)
 	} else {
 		w.WriteHeader(http.StatusUnauthorized)
@@ -320,7 +359,13 @@ func UpdateUser(w http.ResponseWriter, r *http.Request) {
 
 }
 func getByRoll(RollNo string) bool {
-	for _, u := range user {
+	db, err := gorm.Open(sqlite.Open("users.db"), &gorm.Config{})
+	if err != nil {
+		panic("failed to connect database")
+	}
+	var usersForDisplay []User
+	db.Find(usersForDisplay)
+	for _, u := range usersForDisplay {
 		if RollNo == u.RollNo {
 			return true
 		}
