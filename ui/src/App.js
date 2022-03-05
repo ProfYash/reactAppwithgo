@@ -6,6 +6,7 @@ import DisplayUserAddress from './DisplayUserAddress'
 import DeleteUserAdd from './DeleteUserAdd'
 import Home from './Home'
 import Login from './Login'
+import UpdateAddress from './UpdateAddress'
 
 function App(){
     return(
@@ -17,6 +18,7 @@ function App(){
             <Route exact path="/AddAddress/:roll" component={AddAddress} element={<AddAddress />} />
             <Route exact path="/DisplayAddress/:roll" component={DisplayUserAddress} element={<DisplayUserAddress />} />
             <Route exact path="/DeleteAddress/:roll/:add" component={DeleteUserAdd} element={<DeleteUserAdd />} />
+            <Route exact path="/UpdateAddress/:roll/:add" component={DeleteUserAdd} element={<UpdateAddress />} />
             <Route path="*" element={<Login />} />
             </Routes>
         </div>

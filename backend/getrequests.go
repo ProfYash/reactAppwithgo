@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gorilla/mux"
@@ -57,10 +58,32 @@ func getUser(w http.ResponseWriter, r *http.Request) {
 			panic("failed to connect database")
 		}
 		var usersForDisplay []User
+		var addressofuser []Address
+		var dto []DTO
+		var singledto DTO
+		var count = 0
 		db.Find(&usersForDisplay)
-		json.NewEncoder(w).Encode(usersForDisplay)
+		db.Find(&addressofuser)
+		for _, u := range usersForDisplay {
+			singledto.UID = u.UID
+			singledto.RollNo = u.RollNo
+			singledto.FName = u.FName
+			for _, a := range addressofuser {
+				if a.UID == u.UID {
+					count = count + 1
+				}
+			}
+			singledto.CountOfAddress = strconv.Itoa(count)
+			dto = append(dto, singledto)
+			count = 0
+		}
+		db.Create(&dto)
+		json.NewEncoder(w).Encode(dto)
 		for i, _ := range usersForDisplay {
 			usersForDisplay[i] = User{}
+		}
+		for i, _ := range dto {
+			dto[i] = DTO{}
 		}
 		w.WriteHeader(200)
 	} else {

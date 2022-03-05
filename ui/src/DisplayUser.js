@@ -36,7 +36,7 @@ const cardofuser = Object.values(users).map(u=>{
             <div className="card-body" key={u.UID}>
                 Name:&nbsp;&nbsp;&nbsp;{u.FName}<br /><br />
                 Roll:&nbsp;&nbsp;&nbsp;{u.RollNo}<br /><br />
-                Mobile:&nbsp;&nbsp;&nbsp;{u.Contact}<br /><br />
+                Count of Address:&nbsp;&nbsp;&nbsp;{u.countadd}<br /><br />
             </div>
             <div className="card-body" key={u.UID}>
                <DisplayUserAddress roll={u.RollNo} />

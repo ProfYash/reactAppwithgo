@@ -79,34 +79,24 @@ func addUser(w http.ResponseWriter, r *http.Request) {
 
 }
 func UpdateUser(w http.ResponseWriter, r *http.Request) {
-	refreshToken(w, r)
+	//refreshToken(w, r)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 	fmt.Println("Inside UpdateUser")
-	db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
-	if err != nil {
-		panic("failed to connect database")
-	}
-	var usersForDisplay []User
 
 	if isValidCoockie(w, r) {
+		db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
+		if err != nil {
+			panic("failed to connect database")
+		}
+		var usersForDisplay []User
 		var newUser User
 		_ = json.NewDecoder(r.Body).Decode(&newUser)
 		params := mux.Vars(r)
 		fmt.Println(params)
 		db.Model(&usersForDisplay).Where("roll_no = ?", params[("RollNo")]).Updates(newUser)
-		// _deleteUserAtUid(params[("RollNo")])
-		// if flagfordelete == 0 {
-		// 	genrateUID := uuid.New()
-		// 	newUser.UID = genrateUID.String()
-		// 	user = append(user, newUser)
-		// } else if flagfordelete == 2 {
-		// 	flagfordelete = 0
-		// 	w.WriteHeader(http.StatusNotFound)
-		// }
-
 		json.NewEncoder(w).Encode(newUser)
 		w.WriteHeader(200)
 	} else {

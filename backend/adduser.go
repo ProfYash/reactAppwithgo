@@ -123,7 +123,6 @@ func deleteAddress(w http.ResponseWriter, r *http.Request) {
 			}
 			fmt.Println(addresstodelete.City)
 			dbaddress.Where("add_id = ?", addresstodelete.AddID).Delete(&addressfordelete)
-			//dbaddress.Delete(&addresstodelete)
 			w.WriteHeader(200)
 		}
 

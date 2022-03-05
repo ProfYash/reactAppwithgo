@@ -48,6 +48,7 @@ const cardofuser = Object.values(address).map(a=>{
                 {/* <button className="btn btn-primary" onClick={()=>navigate(`/DeleteAddress/${RollNo}/${a.addressname}`)}>Delete Address</button> */}
             
             <DeleteUserAdd roll={RollNo} add={a.addressname} />
+            <button className="btn btn-primary" onClick={()=>navigate(`/UpdateAddress/${RollNo}/${a.addressname}`)}>Update Address</button>
             </div>
     
 {/* hello world */}
