@@ -13,34 +13,20 @@ import (
 
 func main() {
 	flagfordelete = 0
-	//genrateUID := uuid.New()
-
-	// user = append(user, User{
-	// 	UID:     genrateUID.String(),
-	// 	FName:   "cheese",
-	// 	RollNo:  "54",
-	// 	Contact: "989898998",
-	// })
-	// user = append(user, User{
-	// 	UID:     genrateUID.String(),
-	// 	FName:   "yashshah",
-	// 	RollNo:  "55",
-	// 	Contact: "12348",
-	// })
-	db, err := gorm.Open(sqlite.Open("admins.db"), &gorm.Config{})
+	db, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
 	if err != nil {
 		panic("failed to connect database")
 	}
-	db.AutoMigrate(&adminModel{})
+	//db.AutoMigrate(&adminModel{})
 	var aUs []adminModel
-	db.Create(&adminModel{
-		Username: "yashshah",
-		Password: "hello",
-	})
-	db.Create(&adminModel{
-		Username: "kanan",
-		Password: "hello",
-	})
+	// db.Create(&adminModel{
+	// 	Username: "yashshah",
+	// 	Password: "hello",
+	// })
+	// db.Create(&adminModel{
+	// 	Username: "kanan",
+	// 	Password: "hello",
+	// })
 
 	db.Find(&aUs)
 
@@ -94,20 +80,20 @@ func deleteUser(w http.ResponseWriter, r *http.Request) {
 
 }
 func deleteAddress(w http.ResponseWriter, r *http.Request) {
-	refreshToken(w, r)
+	//refreshToken(w, r)
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Access-Control-Allow-Origin", "*")
 	w.Header().Set("Access-Control-Allow-Methods", "POST, GET, OPTIONS, PUT, DELETE")
 	w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
-	fmt.Println("Inside getUsersAddress")
+	fmt.Println("Inside deleteAddress")
 	if isValidCoockie(w, r) {
 		dbaddress, err := gorm.Open(sqlite.Open("address.db"), &gorm.Config{})
 		if err != nil {
 			panic("failed to connect address database")
 		}
 		var allusers []User
-		var addressfordisplay []Address
-		var addresstodelete []Address
+		var addressfordelete []Address
+		var addresstodelete Address
 		var userid = ""
 
 		dbaddress.Find(&allusers)
@@ -124,19 +110,20 @@ func deleteAddress(w http.ResponseWriter, r *http.Request) {
 		}
 		fmt.Println(userid)
 		if userid != "" {
-			dbaddress.Where("uid = ?", userid).Find(&addressfordisplay)
+			dbaddress.Where("uid = ?", userid).Find(&addressfordelete)
 			// dbaddress.Find(&usersaddress)
-			for _, a := range addressfordisplay {
+			for _, a := range addressfordelete {
 
 				if a.AddressName == params[("AddName")] {
 					fmt.Println(a.AddressName)
-					addresstodelete = append(addresstodelete, a)
-
+					addresstodelete = a
+					break
 				}
 
 			}
-
-			dbaddress.Delete(&addresstodelete)
+			fmt.Println(addresstodelete.City)
+			dbaddress.Where("add_id = ?", addresstodelete.AddID).Delete(&addressfordelete)
+			//dbaddress.Delete(&addresstodelete)
 			w.WriteHeader(200)
 		}
 

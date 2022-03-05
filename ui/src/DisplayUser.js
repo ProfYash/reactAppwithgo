@@ -42,7 +42,7 @@ const cardofuser = Object.values(users).map(u=>{
                <DisplayUserAddress roll={u.RollNo} />
             </div>
             <div className="card-body" key={u.UID}>   
-            {/* <AddAddress r={u.RollNo}/> */}
+        
                 <button className="btn btn-primary" onClick={()=>navigate(`/AddAddress/${u.RollNo}`)}>Add Address</button>
             </div>
         </div>

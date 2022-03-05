@@ -3,6 +3,7 @@ import { Route,Link, Routes } from 'react-router-dom'
 import AddAddress from './AddAddress'
 import DisplayUser from './DisplayUser'
 import DisplayUserAddress from './DisplayUserAddress'
+import DeleteUserAdd from './DeleteUserAdd'
 import Home from './Home'
 import Login from './Login'
 
@@ -15,6 +16,7 @@ function App(){
             <Route exact path="/AllUsers" component={DisplayUser} element={<DisplayUser />} />
             <Route exact path="/AddAddress/:roll" component={AddAddress} element={<AddAddress />} />
             <Route exact path="/DisplayAddress/:roll" component={DisplayUserAddress} element={<DisplayUserAddress />} />
+            <Route exact path="/DeleteAddress/:roll/:add" component={DeleteUserAdd} element={<DeleteUserAdd />} />
             <Route path="*" element={<Login />} />
             </Routes>
         </div>

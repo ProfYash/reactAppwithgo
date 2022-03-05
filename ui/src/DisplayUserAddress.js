@@ -1,7 +1,11 @@
 import React,{useState,useEffect} from "react";
 import axios from "axios";
+import DisplayUserAddress from './DisplayUserAddress'
 import {useParams} from "react-router-dom"
+import { useNavigate } from "react-router-dom";
+import DeleteUserAdd from "./DeleteUserAdd";
 export default ({roll}) => {
+    let navigate = useNavigate();
 const [loginStatus,updateloginStatus]=useState('')
     const [address,updateaddress] = useState({})
     let RollNo=roll 
@@ -39,7 +43,12 @@ const cardofuser = Object.values(address).map(a=>{
     First Line:&nbsp;&nbsp;&nbsp;{a.firstlineadd}<br /><br />
     City:&nbsp;&nbsp;&nbsp;{a.city}<br /><br />
     Pincode:&nbsp;&nbsp;&nbsp;{a.pincode}<br /><br />
-
+    <div className="card-body" key={a.UID}>   
+            {/* <AddAddress r={u.RollNo}/> */}
+                {/* <button className="btn btn-primary" onClick={()=>navigate(`/DeleteAddress/${RollNo}/${a.addressname}`)}>Delete Address</button> */}
+            
+            <DeleteUserAdd roll={RollNo} add={a.addressname} />
+            </div>
     
 {/* hello world */}
 </div>
