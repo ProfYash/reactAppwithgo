@@ -14,7 +14,7 @@ import (
 )
 
 func homePage(w http.ResponseWriter, r *http.Request) {
-	refreshToken(w, r)
+	//refreshToken(w, r)
 	cookie, err := r.Cookie("token")
 	if err != nil {
 		if err == http.ErrNoCookie {
